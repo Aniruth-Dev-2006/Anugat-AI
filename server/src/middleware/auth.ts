@@ -27,6 +27,18 @@ export function requireAuth(req: Request, res: Response, next: NextFunction): vo
     return;
   }
 
+  // --- DEMO BYPASS ---
+  if (token === 'demo-token') {
+    req.user = {
+      sub: 'demo-admin',
+      email: 'admin@samayak.demo',
+      role: 'ADMIN',
+      name: 'Demo Admin'
+    };
+    return next();
+  }
+  // -------------------
+
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET!) as AuthPayload;
     req.user = payload;

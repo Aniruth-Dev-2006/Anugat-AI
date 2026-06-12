@@ -10,6 +10,18 @@ import ThreeHeatmap from '../components/ThreeHeatmap';
 import ThreeRing from '../components/ThreeRing';
 import './Dashboard.css';
 
+const PERIODS_TIME = [
+  { id: 'I', time: '08:00', end: '08:50', startMs: 8*60, endMs: 8*60+50 },
+  { id: 'II', time: '09:00', end: '09:50', startMs: 9*60, endMs: 9*60+50 },
+  { id: 'III', time: '10:00', end: '10:50', startMs: 10*60, endMs: 10*60+50 },
+  { id: 'IV', time: '11:00', end: '11:50', startMs: 11*60, endMs: 11*60+50 },
+  { id: 'V', time: '12:00', end: '12:50', startMs: 12*60, endMs: 12*60+50 },
+  { id: 'VI', time: '13:30', end: '14:20', startMs: 13*60+30, endMs: 14*60+20 },
+  { id: 'VII', time: '14:30', end: '15:20', startMs: 14*60+30, endMs: 15*60+20 },
+  { id: 'VIII', time: '15:30', end: '16:20', startMs: 15*60+30, endMs: 16*60+20 },
+  { id: 'IX', time: '16:30', end: '17:20', startMs: 16*60+30, endMs: 17*60+20 }
+];
+
 // ── Types ──────────────────────────────────────────────────────
 interface User {
   name: string;
@@ -17,13 +29,7 @@ interface User {
   role: string;
 }
 
-// ── Under-running courses list (demo) ─────────────────────────
-const UNDER_RUNNING = [
-  { code: 'CS609', name: 'Universal Human Values', scheduled: 3, actual: 1, shortfall: 2 },
-  { code: 'CS603', name: 'Machine Learning',        scheduled: 5, actual: 3, shortfall: 2 },
-  { code: 'CS602', name: 'Computer Networks',       scheduled: 5, actual: 4, shortfall: 1 },
-  { code: 'CS608', name: 'ML Lab',                  scheduled: 4, actual: 3, shortfall: 1 },
-];
+// No more hardcoded data
 
 // ── Day × Period legend ───────────────────────────────────────
 const PERIODS = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX'];
@@ -32,6 +38,22 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [today, setToday] = useState('');
+  const [analytics, setAnalytics] = useState<any>(null);
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  const fetchAnalytics = async () => {
+    try {
+      const res = await fetch(`http://localhost:3001/api/analytics/dashboard`, {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('samayak_token')}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setAnalytics(data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch analytics', error);
+    }
+  };
 
   useEffect(() => {
     // Auth guard
@@ -42,7 +64,17 @@ export default function Dashboard() {
     // Formatted date
     const d = new Date();
     setToday(d.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }));
+    
+    const timer = setInterval(() => setCurrentTime(new Date()), 60000); // update clock every min
+    return () => clearInterval(timer);
   }, [navigate]);
+
+  useEffect(() => {
+    // Fetch overall analytics once
+    fetchAnalytics();
+  }, []);
+
+  const currentMs = currentTime.getHours() * 60 + currentTime.getMinutes();
 
   return (
     <div className="app-shell">
@@ -60,8 +92,8 @@ export default function Dashboard() {
             </h1>
             <p className="dash-date">{today}</p>
           </div>
-          <div className="dash-header-actions">
-            <button className="btn-secondary" id="btn-refresh">
+          <div className="dash-header-actions" style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+            <button className="btn-secondary" id="btn-refresh" onClick={() => fetchAnalytics()}>
               <RefreshCw size={15} strokeWidth={2} />
               Refresh
             </button>
@@ -76,8 +108,8 @@ export default function Dashboard() {
         <section className="stat-grid" aria-label="Key metrics">
           <StatCard
             label="Room Utilisation"
-            value="74%"
-            delta="+6% this week"
+            value={analytics ? `${analytics.roomUtilisation}%` : '...'}
+            delta="Overall usage"
             deltaPositive={true}
             icon={Building2}
             iconColor="#3DA1FF"
@@ -85,7 +117,7 @@ export default function Dashboard() {
           />
           <StatCard
             label="P(Empty Room)"
-            value="0.31"
+            value={analytics ? analytics.pEmpty : '...'}
             subLabel="Per slot avg"
             icon={Clock}
             iconColor="#8B5CF6"
@@ -93,7 +125,7 @@ export default function Dashboard() {
           />
           <StatCard
             label="Under-running"
-            value="4"
+            value={analytics ? analytics.underRunningCount.toString() : '...'}
             subLabel="Courses flagged"
             icon={TrendingDown}
             iconColor="#F59E0B"
@@ -101,19 +133,13 @@ export default function Dashboard() {
           />
           <StatCard
             label="Idle Room-Hrs"
-            value="2.8h"
+            value={analytics ? `${analytics.avgEmptyRoomHrsPerDay}h` : '...'}
             subLabel="Avg per day"
             icon={Activity}
             iconColor="#10B981"
             accent="#10B981"
           />
         </section>
-
-        {/* ── Demo badge ────────────────────── */}
-        <div className="demo-notice">
-          <ShieldCheck size={14} strokeWidth={2} />
-          Showing demo data · Import a timetable PDF to see real analytics
-        </div>
 
         {/* ── 3D Heatmap ────────────────────── */}
         <section className="dash-card heatmap-section">
@@ -131,7 +157,7 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <ThreeHeatmap height={400} />
+          <ThreeHeatmap height={400} data={analytics?.heatmapData || Array(6).fill(Array(9).fill(0))} />
 
           {/* Period axis labels */}
           <div className="period-axis">
@@ -141,62 +167,44 @@ export default function Dashboard() {
           </div>
         </section>
 
-        {/* ── Bottom row ────────────────────── */}
-        <div className="bottom-row">
-
-          {/* Utilisation ring */}
-          <section className="dash-card ring-section">
-            <h2 className="section-title">Utilisation</h2>
-            <p className="section-sub">Room slots filled</p>
-            <div className="ring-center">
-              <ThreeRing value={0.74} size={200} />
+        {/* ── Under-running Classes ────────────────────── */}
+        <section className="dash-card live-schedule-section" style={{ marginTop: 24 }}>
+          <div className="section-header">
+            <div>
+              <h2 className="section-title">Under-running Classes</h2>
+              <p className="section-sub">Courses with fewer scheduled slots than required credits</p>
             </div>
-            <div className="ring-stats">
-              <div className="ring-stat">
-                <span className="ring-stat-value" style={{ color: '#1a4e7a' }}>74%</span>
-                <span className="ring-stat-label">Occupied</span>
-              </div>
-              <div className="ring-stat-divider" />
-              <div className="ring-stat">
-                <span className="ring-stat-value" style={{ color: '#BFDBFE' }}>26%</span>
-                <span className="ring-stat-label">Empty</span>
-              </div>
+            <div style={{ fontWeight: 600, color: '#ef4444', background: '#fef2f2', padding: '6px 12px', borderRadius: 8 }}>
+              {analytics?.underRunning?.length || 0} Alert{analytics?.underRunning?.length !== 1 ? 's' : ''}
             </div>
-          </section>
-
-          {/* Under-running courses */}
-          <section className="dash-card under-section">
-            <h2 className="section-title">Under-running Courses</h2>
-            <p className="section-sub">Classes scheduled but fewer held</p>
-
-            <div className="under-list">
-              {UNDER_RUNNING.map(c => (
-                <div key={c.code} className="under-item">
-                  <div className="under-item-left">
-                    <span className="under-code">{c.code}</span>
-                    <span className="under-name">{c.name}</span>
+          </div>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginTop: 16, maxHeight: 400, overflowY: 'auto', paddingRight: 12 }}>
+            {!analytics?.underRunning || analytics.underRunning.length === 0 ? (
+              <div style={{ padding: 24, textAlign: 'center', color: '#10b981', fontWeight: 500 }}>
+                ✅ All courses meet their minimum credit hours requirement!
+              </div>
+            ) : (
+              analytics.underRunning.map((c: any, idx: number) => (
+                <div key={idx} style={{ display: 'flex', gap: 16, alignItems: 'center', background: '#F8FAFC', padding: 16, borderRadius: 12, border: '1px solid #E2E8F0' }}>
+                  <div style={{ background: '#fef2f2', color: '#ef4444', padding: '12px', borderRadius: 12 }}>
+                    <TrendingDown size={24} />
                   </div>
-                  <div className="under-item-right">
-                    <div className="under-bar-wrap">
-                      <div
-                        className="under-bar-fill"
-                        style={{ width: `${(c.actual / c.scheduled) * 100}%` }}
-                      />
-                    </div>
-                    <span className="under-fraction">
-                      {c.actual}/{c.scheduled}
-                    </span>
+                  <div style={{ flex: 1 }}>
+                    <h3 style={{ fontSize: 16, fontWeight: 700, color: '#1a4e7a', margin: '0 0 4px 0' }}>{c.code} — {c.name}</h3>
+                    <p style={{ margin: 0, fontSize: 14, color: '#64748b' }}>
+                      Scheduled: <strong style={{ color: '#ef4444' }}>{c.scheduled}</strong> hrs / week
+                    </p>
+                  </div>
+                  <div style={{ textAlign: 'right', paddingLeft: 16, borderLeft: '1px solid #e2e8f0' }}>
+                    <div style={{ fontSize: 13, color: '#64748b', fontWeight: 600 }}>Required</div>
+                    <div style={{ fontSize: 24, fontWeight: 800, color: '#0f172a' }}>{c.required} <span style={{ fontSize: 14, fontWeight: 600, color: '#64748b' }}>hrs</span></div>
                   </div>
                 </div>
-              ))}
-            </div>
-
-            <button className="btn-ghost" style={{ marginTop: 16 }} id="btn-view-all-courses">
-              View all
-            </button>
-          </section>
-
-        </div>
+              ))
+            )}
+          </div>
+        </section>
       </main>
     </div>
   );

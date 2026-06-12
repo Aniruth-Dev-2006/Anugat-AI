@@ -8,6 +8,13 @@ import rateLimit from 'express-rate-limit';
 import { correlationId } from './middleware/correlationId';
 import healthRouter      from './routes/health';
 import authRouter        from './routes/auth';
+import importRouter      from './routes/import';
+import analyticsRouter   from './routes/analytics';
+import adminRouter       from './routes/admin';
+import timetableRouter   from './routes/timetable';
+
+// Initialize BullMQ workers
+import './workers/pdfWorker';
 
 const app  = express();
 const PORT = Number(process.env.PORT ?? 3001);
@@ -34,7 +41,7 @@ app.use(correlationId);
 // ── Global rate limiter (auth endpoints get a stricter one) ───
 app.use(rateLimit({
   windowMs: 15 * 60 * 1000, // 15 min
-  max: 300,
+  max: 5000,
   standardHeaders: true,
   legacyHeaders: false,
 }));
@@ -42,14 +49,10 @@ app.use(rateLimit({
 // ── Routes ────────────────────────────────────────────────────
 app.use('/api/health', healthRouter);
 app.use('/api/auth',   authRouter);
-
-// Placeholder — more routes added as we build each feature
-// app.use('/api/departments', departmentsRouter);
-// app.use('/api/rooms',       roomsRouter);
-// app.use('/api/courses',     coursesRouter);
-// app.use('/api/faculty',     facultyRouter);
-// app.use('/api/import',      importRouter);
-// app.use('/api/analytics',   analyticsRouter);
+app.use('/api/import', importRouter);
+app.use('/api/analytics', analyticsRouter);
+app.use('/api/admin', adminRouter);
+app.use('/api/timetable', timetableRouter);
 
 // ── 404 ───────────────────────────────────────────────────────
 app.use((_req, res) => {

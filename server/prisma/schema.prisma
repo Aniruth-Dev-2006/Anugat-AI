@@ -206,7 +206,6 @@ model TimetableSlot {
 
   sharedFaculty TimetableSlotFaculty[]
 
-  @@unique([day, period, semesterId])          // one course per slot per section
   @@index([roomId, day, period])               // fast room-conflict queries
 }
 

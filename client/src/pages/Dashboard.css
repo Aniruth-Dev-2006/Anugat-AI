@@ -297,7 +297,7 @@
 /* ── Bottom row ───────────────────────────────────────────── */
 .bottom-row {
   display: grid;
-  grid-template-columns: 280px 1fr;
+  grid-template-columns: 280px 1fr 1fr;
   gap: var(--sp-6);
   align-items: start;
 }

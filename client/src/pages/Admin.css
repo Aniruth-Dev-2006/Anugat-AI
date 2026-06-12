@@ -1,0 +1,173 @@
+.admin-container {
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+  margin-top: 24px;
+}
+
+.admin-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  background: #fdfdfd;
+}
+
+.admin-tabs button {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.admin-tabs button:hover {
+  background: rgba(0, 0, 0, 0.02);
+  color: var(--text-primary);
+}
+
+.admin-tabs button.active {
+  color: var(--brand-blue);
+  border-bottom-color: var(--brand-blue);
+  background: #fff;
+}
+
+.admin-table-wrap {
+  min-height: 400px;
+  padding: 0;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.admin-table th {
+  padding: 16px 24px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: #fafafa;
+  border-bottom: 1px solid var(--border);
+}
+
+.admin-table td {
+  padding: 16px 24px;
+  font-size: 14px;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.admin-table tr:last-child td {
+  border-bottom: none;
+}
+
+.admin-table tr:hover td {
+  background: rgba(0, 0, 0, 0.01);
+}
+
+.admin-meta {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+/* Badges */
+.badge-gray {
+  display: inline-block;
+  padding: 4px 8px;
+  background: #f0f0f0;
+  color: #555;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.badge-type {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.badge-type.classroom { background: #E3F2FD; color: #1976D2; }
+.badge-type.lab { background: #E8F5E9; color: #2E7D32; }
+
+.badge-warning {
+  display: inline-block;
+  padding: 4px 10px;
+  background: #FFF3E0;
+  color: #E65100;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.text-warning {
+  color: #E65100;
+  font-weight: 600;
+}
+
+.badge-role {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.badge-role.admin { background: #FFEBEE; color: #C62828; }
+.badge-role.coordinator { background: #F3E5F5; color: #6A1B9A; }
+.badge-role.professor { background: #E3F2FD; color: #1565C0; }
+
+/* Actions */
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-icon:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--text-primary);
+}
+
+.btn-icon.delete:hover {
+  background: #FFEBEE;
+  color: #D32F2F;
+}
+
+.admin-loading, .admin-error, .admin-empty {
+  padding: 48px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.admin-error {
+  color: #D32F2F;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
