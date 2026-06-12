@@ -193,7 +193,21 @@ export default function ImportPage() {
                   <select
                     className="form-input"
                     value={semForm.program}
-                    onChange={e => setSemForm(p => ({ ...p, program: e.target.value }))}
+                    onChange={e => {
+                      const newProgram = e.target.value;
+                      setSemForm(p => {
+                        let newBranchShort = p.branchShort;
+                        let newSection = p.section;
+                        // Auto-adjust defaults for PG courses
+                        if (newProgram === 'MTECH' || newProgram === 'MCA') {
+                          newSection = ''; // Usually no sections for PG
+                          if (newBranchShort === 'CS') newBranchShort = 'MCS';
+                        } else if (newProgram === 'BTECH') {
+                          if (newBranchShort === 'MCS') newBranchShort = 'CS';
+                        }
+                        return { ...p, program: newProgram, section: newSection, branchShort: newBranchShort };
+                      });
+                    }}
                     style={{ width: '100%' }}
                   >
                     {PROGRAMS.map(p => <option key={p} value={p}>{p}</option>)}
