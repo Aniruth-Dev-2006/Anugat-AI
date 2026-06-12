@@ -255,9 +255,17 @@ export default function TimetablePage() {
                           <td style={{ textAlign: 'center', verticalAlign: 'top', height: 80, padding: '4px' }}>
                             {periodSlots.length > 0 ? (
                               <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                {periodSlots.map((slot: any, idx: number) => {
+                                {Object.values(periodSlots.reduce((acc: any, slot: any) => {
+                                  const key = slot.course?.id || `unknown-${Math.random()}`;
+                                  if (!acc[key]) {
+                                    acc[key] = { ...slot, rooms: slot.room?.roomNumber && slot.room?.roomNumber !== 'TBD' ? [slot.room.roomNumber] : [] };
+                                  } else if (slot.room?.roomNumber && slot.room?.roomNumber !== 'TBD') {
+                                    acc[key].rooms.push(slot.room.roomNumber);
+                                  }
+                                  return acc;
+                                }, {})).map((slot: any, idx: number) => {
                                   const shortForm = getShortForm(slot.course?.name) || slot.course?.code;
-                                  const roomDisplay = slot.room?.roomNumber && slot.room?.roomNumber !== 'TBD' ? slot.room?.roomNumber : '';
+                                  const roomDisplay = slot.rooms.join(' / ');
                                   
                                   return (
                                     <div key={idx} style={{ background: '#F4F8FD', padding: '6px', borderRadius: '6px', border: '1px solid #D1E5F7', fontSize: 12 }}>
