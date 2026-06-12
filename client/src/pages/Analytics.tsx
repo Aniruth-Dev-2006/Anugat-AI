@@ -5,6 +5,8 @@ import {
   PieChart, Pie, Cell,
   LineChart, Line
 } from 'recharts';
+import { Building2, Clock, TrendingDown, Activity } from 'lucide-react';
+import StatCard from '../components/StatCard';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
@@ -77,6 +79,43 @@ export default function AnalyticsPage() {
             <p className="dash-date">Deep dive into institutional metrics</p>
           </div>
         </header>
+
+        {/* ── Stat Cards ────────────────────── */}
+        <section className="stat-grid" aria-label="Key metrics" style={{ marginTop: '24px' }}>
+          <StatCard
+            label="Room Utilisation"
+            value={analytics ? `${analytics.roomUtilisation}%` : '...'}
+            delta="Overall usage"
+            deltaPositive={true}
+            icon={Building2}
+            iconColor="#3DA1FF"
+            accent="#3DA1FF"
+          />
+          <StatCard
+            label="P(Empty Room)"
+            value={analytics ? analytics.pEmpty : '...'}
+            subLabel="Per slot avg"
+            icon={Clock}
+            iconColor="#8B5CF6"
+            accent="#8B5CF6"
+          />
+          <StatCard
+            label="Under-running"
+            value={analytics ? analytics.underRunningCount?.toString() : '...'}
+            subLabel="Courses flagged"
+            icon={TrendingDown}
+            iconColor="#F59E0B"
+            accent="#F59E0B"
+          />
+          <StatCard
+            label="Idle Room-Hrs"
+            value={analytics ? `${analytics.avgEmptyRoomHrsPerDay}h` : '...'}
+            subLabel="Avg per day"
+            icon={Activity}
+            iconColor="#10B981"
+            accent="#10B981"
+          />
+        </section>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginTop: 24 }}>
           {/* Room Utilisation Pie Chart */}
