@@ -2,25 +2,12 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Building2, Clock, TrendingDown, Activity,
-  FileUp, RefreshCw, ShieldCheck,
+  FileUp, RefreshCw,
 } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
 import StatCard from '../components/StatCard';
 import ThreeHeatmap from '../components/ThreeHeatmap';
-import ThreeRing from '../components/ThreeRing';
 import './Dashboard.css';
-
-const PERIODS_TIME = [
-  { id: 'I', time: '08:00', end: '08:50', startMs: 8*60, endMs: 8*60+50 },
-  { id: 'II', time: '09:00', end: '09:50', startMs: 9*60, endMs: 9*60+50 },
-  { id: 'III', time: '10:00', end: '10:50', startMs: 10*60, endMs: 10*60+50 },
-  { id: 'IV', time: '11:00', end: '11:50', startMs: 11*60, endMs: 11*60+50 },
-  { id: 'V', time: '12:00', end: '12:50', startMs: 12*60, endMs: 12*60+50 },
-  { id: 'VI', time: '13:30', end: '14:20', startMs: 13*60+30, endMs: 14*60+20 },
-  { id: 'VII', time: '14:30', end: '15:20', startMs: 14*60+30, endMs: 15*60+20 },
-  { id: 'VIII', time: '15:30', end: '16:20', startMs: 15*60+30, endMs: 16*60+20 },
-  { id: 'IX', time: '16:30', end: '17:20', startMs: 16*60+30, endMs: 17*60+20 }
-];
 
 // ── Types ──────────────────────────────────────────────────────
 interface User {
@@ -40,8 +27,7 @@ export default function Dashboard() {
   const [user, setUser] = useState<User | null>(null);
   const [today, setToday] = useState('');
   const [analytics, setAnalytics] = useState<any>(null);
-  const [currentTime, setCurrentTime] = useState(new Date());
-  const [selectedSemester, setSelectedSemester] = useState<string>('');
+  const selectedSemester = '';
 
   const fetchAnalytics = async () => {
     try {
@@ -66,17 +52,12 @@ export default function Dashboard() {
     // Formatted date
     const d = new Date();
     setToday(d.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }));
-    
-    const timer = setInterval(() => setCurrentTime(new Date()), 60000); // update clock every min
-    return () => clearInterval(timer);
   }, [navigate]);
 
   useEffect(() => {
     // Fetch overall analytics once
     fetchAnalytics();
   }, []);
-
-  const currentMs = currentTime.getHours() * 60 + currentTime.getMinutes();
 
   return (
     <div className="app-shell">

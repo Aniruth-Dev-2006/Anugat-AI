@@ -123,8 +123,6 @@ export default function ImportPage() {
     }
   };
 
-  const semesterLabel = (s: any) =>
-    `${s.branch?.program || ''} · ${s.branch?.shortCode || s.branch?.name || ''} · Semester ${s.number}${s.section ? ' (' + s.section + ')' : ''} · ${s.branch?.department?.shortCode || ''}`;
 
   return (
     <div className="app-shell">
