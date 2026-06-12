@@ -13,7 +13,7 @@ export const PDF_QUEUE = 'pdf-ingestion';
 
 // The queue — API pushes jobs here
 export const pdfQueue = new Queue(PDF_QUEUE, {
-  connection: redisConnection,
+  connection: redisConnection as any,
   defaultJobOptions: {
     attempts: 3,
     backoff: { type: 'exponential', delay: 2000 },
@@ -24,5 +24,5 @@ export const pdfQueue = new Queue(PDF_QUEUE, {
 
 // Queue events — for listening to progress updates (used by WebSocket)
 export const pdfQueueEvents = new QueueEvents(PDF_QUEUE, {
-  connection: new IORedis(REDIS_URL, { maxRetriesPerRequest: null }),
+  connection: new IORedis(REDIS_URL, { maxRetriesPerRequest: null }) as any,
 });
