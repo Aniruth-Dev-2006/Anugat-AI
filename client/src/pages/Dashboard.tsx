@@ -33,6 +33,7 @@ interface User {
 
 // ── Day × Period legend ───────────────────────────────────────
 const PERIODS = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX'];
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -40,10 +41,11 @@ export default function Dashboard() {
   const [today, setToday] = useState('');
   const [analytics, setAnalytics] = useState<any>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [selectedSemester, setSelectedSemester] = useState<string>('');
 
   const fetchAnalytics = async () => {
     try {
-      const res = await fetch(`http://localhost:3001/api/analytics/dashboard`, {
+      const res = await fetch(`${API_URL}/api/analytics/dashboard${selectedSemester ? `?semesterId=${selectedSemester}` : ''}`, {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('samayak_token')}` }
       });
       if (res.ok) {

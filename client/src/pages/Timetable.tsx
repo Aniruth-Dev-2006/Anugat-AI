@@ -15,6 +15,8 @@ const PERIODS = [
   { id: 'IX', time: '16:30 - 17:20' }
 ];
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+
 export default function TimetablePage() {
   const [slots, setSlots] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -28,7 +30,7 @@ export default function TimetablePage() {
 
   // Load semesters list on mount; auto-select first if nothing stored
   useEffect(() => {
-    fetch('http://localhost:3001/api/timetable/semesters', {
+    fetch(`${API_URL}/api/timetable/semesters`, {
       headers: { 'Authorization': `Bearer ${localStorage.getItem('samayak_token')}` }
     })
     .then(r => r.json())
@@ -59,7 +61,7 @@ export default function TimetablePage() {
 
     const fetchSlots = async () => {
       try {
-        const url = `http://localhost:3001/api/timetable?semesterId=${selectedSemester}`;
+        const url = `${API_URL}/api/timetable?semesterId=${selectedSemester}`;
         const res = await fetch(url, {
           headers: { 'Authorization': `Bearer ${localStorage.getItem('samayak_token')}` }
         });
@@ -82,7 +84,7 @@ export default function TimetablePage() {
     };
     const fetchMetadata = async () => {
       try {
-        const res = await fetch(`http://localhost:3001/api/timetable/metadata?semesterId=${selectedSemester}`, {
+        const res = await fetch(`${API_URL}/api/timetable/metadata?semesterId=${selectedSemester}`, {
           headers: { 'Authorization': `Bearer ${localStorage.getItem('samayak_token')}` }
         });
         if (res.ok) setMetadata(await res.json());
@@ -167,7 +169,7 @@ export default function TimetablePage() {
                   <button className="btn-secondary" onClick={() => setShowClearModal(false)}>Cancel</button>
                   <button className="btn-primary" style={{ background: '#ef4444' }} onClick={async () => {
                     try {
-                      const res = await fetch(`http://localhost:3001/api/timetable/semesters/${selectedSemester}`, {
+                      const res = await fetch(`${API_URL}/api/timetable/semesters/${selectedSemester}`, {
                         method: 'DELETE',
                         headers: { 'Authorization': `Bearer ${localStorage.getItem('samayak_token')}` }
                       });
@@ -175,7 +177,7 @@ export default function TimetablePage() {
                         setSlots([]);
                         setShowClearModal(false);
                         // Refresh semesters list
-                        const sRes = await fetch('http://localhost:3001/api/timetable/semesters', {
+                        const sRes = await fetch(`${API_URL}/api/timetable/semesters`, {
                           headers: { 'Authorization': `Bearer ${localStorage.getItem('samayak_token')}` }
                         });
                         const sData = await sRes.json();

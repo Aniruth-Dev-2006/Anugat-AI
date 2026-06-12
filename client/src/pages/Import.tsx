@@ -4,6 +4,8 @@ import { UploadCloud, FileText, CheckCircle2, AlertCircle, Loader2, BookOpen, In
 import Sidebar from '../components/Sidebar';
 import './Import.css';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+
 type JobStatus = 'QUEUED' | 'PARSING' | 'INTEGRATING' | 'DONE' | 'FAILED';
 
 interface ImportJob {
@@ -50,7 +52,7 @@ export default function ImportPage() {
   });
 
   useEffect(() => {
-    fetch('http://localhost:3001/api/timetable/semesters', {
+    fetch(`${API_URL}/api/timetable/semesters`, {
       headers: { 'Authorization': `Bearer ${localStorage.getItem('samayak_token')}` }
     })
     .then(r => r.json())
@@ -64,7 +66,7 @@ export default function ImportPage() {
     if (job && (job.status === 'QUEUED' || job.status === 'PARSING' || job.status === 'INTEGRATING')) {
       interval = setInterval(async () => {
         try {
-          const res = await fetch(`http://localhost:3001/api/import/status/${job.id}`, {
+          const res = await fetch(`${API_URL}/api/import/status/${job.id}`, {
             headers: { 'Authorization': `Bearer ${localStorage.getItem('samayak_token')}` }
           });
           if (res.ok) setJob(await res.json());
@@ -106,7 +108,7 @@ export default function ImportPage() {
     }
 
     try {
-      const res = await fetch('http://localhost:3001/api/import/timetable', {
+      const res = await fetch(`${API_URL}/api/import/timetable`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${localStorage.getItem('samayak_token')}` },
         body: formData,

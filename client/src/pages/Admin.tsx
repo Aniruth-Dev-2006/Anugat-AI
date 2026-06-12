@@ -5,6 +5,8 @@ import './Admin.css';
 
 type Tab = 'TIMETABLES' | 'DEPARTMENTS' | 'ROOMS' | 'COURSES' | 'FACULTY';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState<Tab>('TIMETABLES');
   const [data, setData] = useState<any[]>([]);
@@ -27,7 +29,7 @@ export default function AdminPage() {
     setError('');
     try {
       const endpoint = tab.toLowerCase();
-      const url = selectedSemester ? `http://localhost:3001/api/admin/${endpoint}?semesterId=${selectedSemester}` : `http://localhost:3001/api/admin/${endpoint}`;
+      const url = selectedSemester ? `${API_URL}/api/admin/${endpoint}?semesterId=${selectedSemester}` : `${API_URL}/api/admin/${endpoint}`;
       const res = await fetch(url, {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('samayak_token')}` }
       });
@@ -42,7 +44,7 @@ export default function AdminPage() {
   };
 
   useEffect(() => {
-    fetch('http://localhost:3001/api/timetable/semesters', {
+    fetch(`${API_URL}/api/timetable/semesters`, {
       headers: { 'Authorization': `Bearer ${localStorage.getItem('samayak_token')}` }
     })
     .then(r => r.json())
@@ -66,7 +68,7 @@ export default function AdminPage() {
 
   useEffect(() => {
     if (!selectedSemester) return;
-    fetch(`http://localhost:3001/api/timetable/metadata?semesterId=${selectedSemester}`, {
+    fetch(`${API_URL}/api/timetable/metadata?semesterId=${selectedSemester}`, {
       headers: { 'Authorization': `Bearer ${localStorage.getItem('samayak_token')}` }
     })
     .then(r => r.json())
@@ -77,7 +79,7 @@ export default function AdminPage() {
   const confirmDelete = async () => {
     if (!recordToDelete) return;
     try {
-      const res = await fetch(`http://localhost:3001/api/admin/${activeTab.toLowerCase()}/${recordToDelete}`, {
+      const res = await fetch(`${API_URL}/api/admin/${activeTab.toLowerCase()}/${recordToDelete}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${localStorage.getItem('samayak_token')}` }
       });
@@ -101,7 +103,7 @@ export default function AdminPage() {
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch(`http://localhost:3001/api/admin/${activeTab.toLowerCase()}`, {
+      const res = await fetch(`${API_URL}/api/admin/${activeTab.toLowerCase()}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
