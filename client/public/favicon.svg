@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <rect width="100" height="100" rx="20" fill="#000"/>
+  <!-- White "a" glyph -->
+  <text x="8" y="76" font-family="Figtree,Arial,sans-serif" font-weight="900" font-size="74" fill="white">a</text>
+  <!-- 4-point blue spark -->
+  <path d="M76 12 L79.5 22 L90 25.5 L79.5 29 L76 39 L72.5 29 L62 25.5 L72.5 22 Z" fill="#3DA1FF"/>
+</svg>

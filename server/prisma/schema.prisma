@@ -1,0 +1,254 @@
+// ============================================================
+//  SAMAYAK — PRISMA SCHEMA
+//  Database: PostgreSQL (Supabase)
+// ============================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")   // pooled connection (Transaction mode)
+  directUrl = env("DIRECT_URL")     // direct connection (for migrations)
+}
+
+// ─────────────────────────────────────────────────────────────
+//  ENUMS
+// ─────────────────────────────────────────────────────────────
+
+enum Program {
+  BTECH
+  MCA
+  MTECH
+}
+
+enum RoomType {
+  CLASSROOM
+  LAB
+  OTHER
+}
+
+enum CourseType {
+  LECTURE
+  LAB
+  TUTORIAL
+}
+
+enum Role {
+  ADMIN
+  COORDINATOR
+  PROFESSOR
+  HOD
+  DEAN
+}
+
+enum Day {
+  MON
+  TUE
+  WED
+  THU
+  FRI
+  SAT
+}
+
+enum Period {
+  I
+  II
+  III
+  IV
+  V
+  VI
+  VII
+  VIII
+  IX
+}
+
+enum JobStatus {
+  QUEUED
+  PARSING
+  INTEGRATING
+  DONE
+  FAILED
+}
+
+// ─────────────────────────────────────────────────────────────
+//  DEPARTMENT
+// ─────────────────────────────────────────────────────────────
+
+model Department {
+  id        String   @id @default(cuid())
+  name      String
+  shortCode String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  branches  Branch[]
+  rooms     Room[]
+  faculty   Faculty[]
+}
+
+// ─────────────────────────────────────────────────────────────
+//  BRANCH  (e.g. CS, AIML, MCA, M.Tech)
+// ─────────────────────────────────────────────────────────────
+
+model Branch {
+  id           String     @id @default(cuid())
+  name         String
+  shortCode    String
+  program      Program
+  departmentId String
+  department   Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  semesters    Semester[]
+  courses      Course[]
+
+  @@unique([shortCode, departmentId])
+}
+
+// ─────────────────────────────────────────────────────────────
+//  SEMESTER  (branch + semester number + section)
+//  e.g. CS VI-A, CS VI-B, AIML IV, MCA II
+// ─────────────────────────────────────────────────────────────
+
+model Semester {
+  id        String   @id @default(cuid())
+  number    Int      // 2 | 4 | 6
+  section   String?  // A | B | C | D  (null for single-section programs)
+  branchId  String
+  branch    Branch   @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  slots     TimetableSlot[]
+
+  @@unique([number, section, branchId])
+}
+
+// ─────────────────────────────────────────────────────────────
+//  ROOM  (lecture rooms + labs)
+// ─────────────────────────────────────────────────────────────
+
+model Room {
+  id           String     @id @default(cuid())
+  roomNumber   String
+  type         RoomType   @default(CLASSROOM)
+  capacity     Int?       // null = unknown (flagged in analytics)
+  departmentId String
+  department   Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  isActive     Boolean    @default(true)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  slots        TimetableSlot[]
+
+  @@unique([roomNumber, departmentId])
+}
+
+// ─────────────────────────────────────────────────────────────
+//  COURSE / SUBJECT
+// ─────────────────────────────────────────────────────────────
+
+model Course {
+  id           String     @id @default(cuid())
+  code         String     @unique
+  name         String
+  credits      Float      // decimal credits (0 allowed → isZeroCredit flagged)
+  type         CourseType @default(LECTURE)
+  branchId     String
+  branch       Branch     @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  semester     Int
+  isZeroCredit Boolean    @default(false)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  slots        TimetableSlot[]
+}
+
+// ─────────────────────────────────────────────────────────────
+//  FACULTY / USER
+// ─────────────────────────────────────────────────────────────
+
+model Faculty {
+  id           String      @id @default(cuid())
+  name         String
+  email        String      @unique
+  role         Role        @default(PROFESSOR)
+  departmentId String?
+  department   Department? @relation(fields: [departmentId], references: [id])
+  passwordHash String
+  isDeleted    Boolean     @default(false)  // soft delete — recoverable
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  primarySlots  TimetableSlot[]         @relation("PrimaryFaculty")
+  sharedSlots   TimetableSlotFaculty[]
+}
+
+// ─────────────────────────────────────────────────────────────
+//  TIMETABLE SLOT  (one cell in the timetable grid)
+// ─────────────────────────────────────────────────────────────
+
+model TimetableSlot {
+  id         String    @id @default(cuid())
+  day        Day
+  period     Period
+  semesterId String
+  semester   Semester  @relation(fields: [semesterId], references: [id], onDelete: Cascade)
+  courseId   String
+  course     Course    @relation(fields: [courseId], references: [id])
+  roomId     String?
+  room       Room?     @relation(fields: [roomId], references: [id])
+  facultyId  String?
+  faculty    Faculty?  @relation("PrimaryFaculty", fields: [facultyId], references: [id])
+  createdAt  DateTime  @default(now())
+
+  sharedFaculty TimetableSlotFaculty[]
+
+  @@unique([day, period, semesterId])          // one course per slot per section
+  @@index([roomId, day, period])               // fast room-conflict queries
+}
+
+// ─────────────────────────────────────────────────────────────
+//  TIMETABLE SLOT FACULTY  (multi-faculty labs)
+// ─────────────────────────────────────────────────────────────
+
+model TimetableSlotFaculty {
+  slotId    String
+  slot      TimetableSlot @relation(fields: [slotId], references: [id], onDelete: Cascade)
+  facultyId String
+  faculty   Faculty       @relation(fields: [facultyId], references: [id])
+
+  @@id([slotId, facultyId])
+}
+
+// ─────────────────────────────────────────────────────────────
+//  IMPORT JOB  (tracks PDF ingestion pipeline state)
+// ─────────────────────────────────────────────────────────────
+
+model ImportJob {
+  id          String    @id @default(cuid())
+  filename    String
+  status      JobStatus @default(QUEUED)
+  summary     Json?     // { created, matched, failed, failReasons[] }
+  createdAt   DateTime  @default(now())
+  completedAt DateTime?
+  updatedAt   DateTime  @updatedAt
+}
+
+// ─────────────────────────────────────────────────────────────
+//  ANALYTICS SNAPSHOT  (cached metric values)
+// ─────────────────────────────────────────────────────────────
+
+model AnalyticsSnapshot {
+  id         String   @id @default(cuid())
+  metric     String   // "room_utilisation" | "p_empty" | "under_running" | "avg_empty_hours"
+  value      Float
+  scope      String?  // roomId | period | courseId | null (= overall)
+  metadata   Json?    // extra context (e.g. room name, period label)
+  computedAt DateTime @default(now())
+
+  @@index([metric, scope])
+  @@index([computedAt])
+}

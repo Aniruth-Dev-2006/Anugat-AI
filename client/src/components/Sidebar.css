@@ -1,0 +1,130 @@
+/* ============================================================
+   SAMAYAK SIDEBAR
+   Matches: Samayak Design System — Navigation (image ref 10)
+   - 240px fixed
+   - White surface, rounded-22 items
+   - Active: gradient pill (#1a4e7a → #3DA1FF)
+   - Inactive: #536778 text
+   - Log out: black pill at bottom
+============================================================ */
+
+/* ── Layout ───────────────────────────────────────────────── */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 240px;
+  height: 100vh;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 16px;
+  gap: 0;
+  box-shadow: 2px 0 12px rgba(26, 78, 122, 0.07);
+  z-index: 100;
+}
+
+/* ── Brand ────────────────────────────────────────────────── */
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 8px 24px 8px;
+  border-bottom: 1px solid #EEF3F8;
+  margin-bottom: 16px;
+}
+
+.sidebar-logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: block;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.sidebar-brand-name {
+  font-family: 'Figtree', sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  color: #0B1C2D;
+  letter-spacing: -0.3px;
+}
+
+/* ── Nav ──────────────────────────────────────────────────── */
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;           /* icon ↔ label = 8px from spacing scale */
+  padding: 10px 12px;
+  border-radius: 14px;
+  text-decoration: none;
+  color: #536778;
+  font-family: 'Figtree', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.18s ease, color 0.18s ease;
+  cursor: pointer;
+}
+
+.sidebar-item:hover:not(.sidebar-item--active) {
+  background: #F0F6FF;
+  color: #1a4e7a;
+}
+
+/* Active state: gradient pill matching design system */
+.sidebar-item--active {
+  background: linear-gradient(135deg, #1a4e7a 0%, #3DA1FF 100%);
+  color: #ffffff;
+}
+
+.sidebar-item--active .sidebar-item-icon {
+  color: #ffffff;
+}
+
+.sidebar-item-icon {
+  flex-shrink: 0;
+  color: inherit;
+}
+
+.sidebar-item-label {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* ── Footer / Logout ──────────────────────────────────────── */
+.sidebar-footer {
+  padding-top: 16px;
+  border-top: 1px solid #EEF3F8;
+}
+
+/* Black pill button — matches design system "Utility (dark)" */
+.sidebar-logout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 20px;
+  background: #0B1C2D;
+  color: #ffffff;
+  border: none;
+  border-radius: 100px;
+  font-family: 'Figtree', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.sidebar-logout:hover {
+  opacity: 0.85;
+  transform: translateY(-1px);
+}
