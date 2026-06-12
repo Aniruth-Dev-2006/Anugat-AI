@@ -236,12 +236,14 @@ export const pdfWorker = new Worker(
         semester = await prisma.semester.findUnique({ where: { id: job.data.semesterId } });
       }
       if (!semester) {
-        // Always upsert based on exact identity — never fall back to findFirst()
-        semester = await prisma.semester.upsert({
-          where: { number_section_branchId: { number: semNum, section: section, branchId: branch.id } },
-          create: { number: semNum, section: section, branchId: branch.id },
-          update: {}
+        semester = await prisma.semester.findFirst({
+          where: { number: semNum, section: section, branchId: branch.id }
         });
+        if (!semester) {
+          semester = await prisma.semester.create({
+            data: { number: semNum, section: section, branchId: branch.id }
+          });
+        }
       }
 
       let createdRooms = 0;
