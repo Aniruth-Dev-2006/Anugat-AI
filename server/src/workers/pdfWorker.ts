@@ -55,7 +55,7 @@ export const pdfWorker = new Worker(
       let extractedOcrMeta: any = {};  // will be populated after OCR, used in integration phase
       
       try {
-        const { stdout } = await execFileAsync('python', [scriptPath, tempPdfPath]);
+        const { stdout } = await execFileAsync('python3', [scriptPath, tempPdfPath]);
         // The script returns JSON {"tables_html": ["<html>..."]}
         const result = JSON.parse(stdout);
         
