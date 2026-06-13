@@ -51,8 +51,8 @@ router.get('/departments', requireAuth, async (req, res) => {
       include: {
         _count: { 
           select: { 
-            rooms: semesterId ? { where: { slots: { some: { semesterId: String(semesterId) } } } } : true, 
-            faculty: semesterId ? { where: { primarySlots: { some: { semesterId: String(semesterId) } } } } : true, 
+            rooms: true, 
+            faculty: true, 
             branches: true 
           } 
         }
